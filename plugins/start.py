@@ -347,6 +347,50 @@ async def list_admins(client, message: Message):
     await message.reply(f"🧩 Your saved Admin IDs:\n├🆔 {admin_list}", parse_mode=enums.ParseMode.HTML)
 
 # ///////////////////////////////////////////////////////////////
+
+@Client.on_message(filters.private & filters.command("revoke"))
+async def revoke_link(client, message: Message):
+    """
+    This handler listens for the '/revoke {unique_id}' command.
+    The bot searches for the unique_id in the stream_logs channel, 
+    and updates the message with "revoked👎" instead of the unique_id.
+    """
+    try:
+        # Check if the sender is the admin (replace `ADMIN_USER_ID` with your actual admin ID)
+       
+        # Get the unique_id from the message
+        command_text = message.text.strip()
+        if not command_text.startswith("/revoke"):
+            await message.reply("❌ Invalid command. Please use /revoke {unique_id}.")
+            return
+        
+        unique_id = command_text.split(" ")[1].strip()
+        
+        # Ensure a unique_id is provided
+        if not unique_id:
+            await message.reply("❌ Please provide a valid unique_id to revoke.")
+            return
+
+        # Fetch the messages from the stream_logs channel (replace `STREAM_LOGS` with your channel ID)
+        async for log_message in client.iter_messages(STREAM_LOGS):
+            if unique_id in log_message.text:
+                # Found the message with the unique_id
+                updated_text = log_message.text.replace(unique_id, "revoked👎")
+
+                # Update the message with the new text
+                await log_message.edit(updated_text)
+
+                # Notify the admin about the successful revocation
+                await message.reply(f"✅ The link with unique_id `{unique_id}` has been revoked.")
+                return
+        
+        # If the unique_id was not found
+        await message.reply(f"❌ No message with the unique_id `{unique_id}` found in stream_logs.")
+
+    except Exception as e:
+        print(f"Error in /revoke command: {e}")
+        await message.reply("❌ An error occurred while processing your request.")
+
 # ///////////////////////////////////////////////////////////////
 async def verify_user(user_id: int):
     LAZYLISTS = await get_admin_ids()
