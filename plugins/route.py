@@ -163,7 +163,7 @@ async def play_handler(request: web.Request):
         message_id = int(request.match_info["message_id"])
 
         # Retrieve the log message from the Stream Logs
-        log_message = await lazydeveloperxbot.get_messages(STREAM_LOGS, message_ids=[message_id])
+        log_message = await lazydeveloperxbot.get_messages(STREAM_LOGS, message_ids=message_id)
 
         # Check if the unique_id exists in the log message
         if not log_message or unique_id not in log_message.text:

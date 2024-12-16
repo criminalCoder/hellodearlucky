@@ -177,30 +177,27 @@ async def cb_handler(client: Client, query: CallbackQuery):
             xo = await query.message.reply_text(f'🔐')
             
             original_link = query.message.reply_to_message
-            
-            # urls = original_link.
-             # Check if the user replied to a message
-
-            print(f"{original_link}")
 
             log_msg = await client.send_message(
                 chat_id=STREAM_LOGS, 
                 text=f"{original_link.text}",
             )
 
+            unique_id = generate_hash(log_msg.id)
+            target_url = original_link.text
+            stream_url = f"{URL}play/{unique_id}/{log_msg.id}"
+            reply_button = InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton("📺 Stream Now 🎥", url=stream_url)
+                ]
+            ])
+            await log_msg.edit_text(
+                f"{target_url}\n\n<blockquote><b>🧩Unique-id<b>: <code>{unique_id}</code> </blockquote>\n<b>👮‍♂️ GENERATED-BY</b>\n<blockquote><b>👩‍💻Name:</b> {query.from_user.mention}\n<b>🆔ID:</b> {query.from_user.id} </blockquote>\n<blockquote>📱<b>Generated Link:<b> {stream_url}</b></blockquote>\n<blockquote>🗑REVOKE LINK :\n/revoke {unique_id}</blockquote>",
+                    reply_markup=reply_button)
             await asyncio.sleep(1)
             await xo.delete()
-            secure_hash = generate_hash(log_msg.id)
-            print(f"generated secure hash ==> {secure_hash}")
-            await asyncio.sleep(1)
-            target_url = original_link.text
-            unique_id = secure_hash
-            await log_msg.edit_text(f"{target_url}\n\nunique_id = {unique_id}")
-            stream_url = f"{URL}play/{unique_id}/{log_msg.id}"
-
             await query.message.edit(
                 text=f"✅ Your streamable link is ready:\n\n🔗 Watch Now => {stream_url}",
-                quote=True,
                 disable_web_page_preview=True,
                 parse_mode=enums.ParseMode.HTML
             )
